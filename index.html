@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Posto Distrito</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2d5aa0;
+            --primary-light: #3b82f6;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .logo-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .company-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .company-info p {
+            color: var(--gray);
+            font-size: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+        }
+
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Painel de Edição */
+        .edit-panel {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .edit-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-control {
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-control.editable {
+            background: #fff9e6;
+        }
+
+        /* Tabela de Produtos */
+        .products-table {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        th {
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--light);
+        }
+
+        td {
+            padding: 16px 15px;
+            font-size: 15px;
+            color: var(--dark);
+            vertical-align: middle;
+        }
+
+        .editable-cell {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .editable-cell:hover {
+            background: #fff9e6;
+        }
+
+        .editable-cell input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            font-size: 15px;
+            background: white;
+        }
+
+        .product-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: white;
+        }
+
+        .icon-gas {
+            background: var(--primary-light);
+        }
+
+        .icon-diesel {
+            background: var(--secondary);
+        }
+
+        .icon-gnv {
+            background: #8b5cf6;
+        }
+
+        .icon-other {
+            background: var(--warning);
+        }
+
+        .product-name {
+            display: flex;
+            align-items: center;
+        }
+
+        .unit {
+            font-size: 13px;
+            color: var(--gray);
+            margin-left: 3px;
+        }
+
+        .growth-cell {
+            font-weight: 700;
+        }
+
+        .growth-positive {
+            color: var(--secondary);
+        }
+
+        .growth-negative {
+            color: var(--danger);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: var(--light);
+            color: var(--gray);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-edit:hover {
+            background: #e0f2fe;
+            color: var(--primary);
+        }
+
+        .btn-delete:hover {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        /* Cards de Resumo */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .card-growth {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-top: 25px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+                min-width: 140px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .section-title {
+                font-size: 20px;
+            }
+            
+            th, td {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+            
+            .product-name {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .product-icon {
+                margin-bottom: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-value {
+                font-size: 24px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Notificações */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-success {
+            background: var(--secondary);
+        }
+
+        .notification-error {
+            background: var(--danger);
+        }
+
+        .notification-info {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-gas-pump"></i>
+                </div>
+                <div class="company-info">
+                    <h1>Posto Distrito</h1>
+                    <p>Painel de Controle - Relatório de Vendas</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="toggleEditPanel()">
+                    <i class="fas fa-edit"></i> Editar Configurações
+                </button>
+                <button class="btn btn-secondary" onclick="addNewProduct()">
+                    <i class="fas fa-plus"></i> Novo Produto
+                </button>
+                <button class="btn btn-success" onclick="generatePDF()">
+                    <i class="fas fa-download"></i> Exportar PDF
+                </button>
+                <button class="btn btn-warning" onclick="resetData()">
+                    <i class="fas fa-undo"></i> Resetar Dados
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel de Edição -->
+        <div class="edit-panel" id="editPanel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-cog"></i> Configurações do Relatório
+                </div>
+                <button class="btn btn-secondary" onclick="toggleEditPanel()">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome da Empresa</label>
+                    <input type="text" id="companyName" class="form-control" value="Posto Distrito">
+                </div>
+                <div class="form-group">
+                    <label>Período de Relatório</label>
+                    <input type="text" id="reportPeriod" class="form-control" value="Outubro a Dezembro">
+                </div>
+                <div class="form-group">
+                    <label>Ano Inicial</label>
+                    <input type="number" id="startYear" class="form-control" value="2024" min="2000" max="2100">
+                </div>
+                <div class="form-group">
+                    <label>Ano Final</label>
+                    <input type="number" id="endYear" class="form-control" value="2025" min="2000" max="2100">
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> Salvar Alterações
+                </button>
+            </div>
+        </div>
+
+        <!-- Cards de Resumo -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-title">Crescimento Total</div>
+                <div class="card-value" id="totalGrowth">21,36%</div>
+                <div class="card-growth growth-positive">
+                    <i class="fas fa-chart-line"></i> <span id="totalDifference">+251.617,85</span> unidades
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Produto Mais Vendido (<span id="topYear">2025</span>)</div>
+                <div class="card-value" id="topProduct">GNV</div>
+                <div class="card-growth">
+                    <span id="topProductValue">695.569,17</span> <span class="unit" id="topProductUnit">M³</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Maior Crescimento</div>
+                <div class="card-value" id="highestGrowthProduct">Gasolina Aditivada</div>
+                <div class="card-growth growth-positive">
+                    <i class="fas fa-arrow-up"></i> <span id="highestGrowthValue">+100,97%</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Menor Crescimento</div>
+                <div class="card-value" id="lowestGrowthProduct">GNV</div>
+                <div class="card-growth growth-positive">
+                    <i class="fas fa-arrow-up"></i> <span id="lowestGrowthValue">+18,93%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Produtos -->
+        <div class="products-table">
+            <div class="table-header">
+                <div class="section-title">
+                    <i class="fas fa-list"></i> Comparativo de Vendas por Produto
+                    <span style="font-size: 14px; color: var(--gray); margin-left: 10px;">
+                        (<span id="year1Display">2024</span> vs <span id="year2Display">2025</span>)
+                    </span>
+                </div>
+                <button class="btn btn-success" onclick="recalculateAll()">
+                    <i class="fas fa-calculator"></i> Recalcular Tudo
+                </button>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th><span id="year1Header">2024</span> (Q4)</th>
+                            <th><span id="year2Header">2025</span> (Q4)</th>
+                            <th>Diferença</th>
+                            <th>Crescimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Produtos serão inseridos aqui via JavaScript -->
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f0f9ff; font-weight: 700;">
+                            <td>TOTAL GERAL</td>
+                            <td id="totalYear1">1.177.740,00</td>
+                            <td id="totalYear2">1.429.357,85</td>
+                            <td id="totalDifferenceCell">+251.617,85</td>
+                            <td class="growth-cell growth-positive" id="totalGrowthCell">+21,36%</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Relatório gerado em:</strong> <span id="currentDate"></span></p>
+            <p>Dados atualizados automaticamente ao editar | Use o botão "Exportar PDF" para salvar o relatório</p>
+            <p style="margin-top: 10px; font-size: 12px;">© Posto Distrito - Sistema de Gestão de Vendas</p>
+        </div>
+    </div>
+
+    <!-- Notificações -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Alterações salvas com sucesso!</span>
+    </div>
+
+    <script>
+        // Dados iniciais
+        let products = [
+            { id: 1, name: "Etanol Hidratado", icon: "fa-leaf", color: "#10b981", unit: "I", year1: 47330.34, year2: 74700.33 },
+            { id: 2, name: "Gasolina Aditivada", icon: "fa-gas-pump", color: "#3b82f6", unit: "I", year1: 33125.00, year2: 66572.87 },
+            { id: 3, name: "Gasolina Comum", icon: "fa-gas-pump", color: "#3b82f6", unit: "I", year1: 200762.27, year2: 298778.13 },
+            { id: 4, name: "GNV", icon: "fa-car", color: "#8b5cf6", unit: "M³", year1: 584863.00, year2: 695569.17 },
+            { id: 5, name: "Óleo Diesel B S-500", icon: "fa-truck", color: "#10b981", unit: "I", year1: 64067.92, year2: 81386.68 },
+            { id: 6, name: "Óleo Diesel B S-10", icon: "fa-truck", color: "#10b981", unit: "I", year1: 220248.13, year2: 293254.33 },
+            { id: 7, name: "Produto X", icon: "fa-box", color: "#f59e0b", unit: "un", year1: 27343.34, year2: 45096.38 }
+        ];
+
+        let settings = {
+            companyName: "Posto Distrito",
+            reportPeriod: "Outubro a Dezembro",
+            startYear: 2024,
+            endYear: 2025
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            renderTable();
+            updateSummaryCards();
+            updateDate();
+            updateHeaders();
+        });
+
+        // Funções principais
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            products.forEach(product => {
+                const difference = product.year2 - product.year1;
+                const growth = ((difference / product.year1) * 100).toFixed(2);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="product-name">
+                            <div class="product-icon" style="background: ${product.color};">
+                                <i class="fas ${product.icon}"></i>
+                            </div>
+                            ${product.name}
+                        </div>
+                    </td>
+                    <td class="editable-cell" onclick="editCell(${product.id}, 'year1')">
+                        ${formatNumber(product.year1)} <span class="unit">${product.unit}</span>
+                    </td>
+                    <td class="editable-cell" onclick="editCell(${product.id}, 'year2')">
+                        ${formatNumber(product.year2)} <span class="unit">${product.unit}</span>
+                    </td>
+                    <td class="growth-cell ${difference >= 0 ? 'growth-positive' : 'growth-negative'}">
+                        ${difference >= 0 ? '+' : ''}${formatNumber(difference)} <span class="unit">${product.unit}</span>
+                    </td>
+                    <td class="growth-cell ${growth >= 0 ? 'growth-positive' : 'growth-negative'}">
+                        ${growth >= 0 ? '+' : ''}${growth}%
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="action-btn btn-edit" onclick="editProduct(${product.id})" title="Editar produto">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteProduct(${product.id})" title="Excluir produto">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updateTotals();
+        }
+
+        function editCell(productId, field) {
+            const product = products.find(p => p.id === productId);
+            const cell = event.target.closest('td');
+            
+            if (cell.querySelector('input')) return;
+            
+            const originalValue = product[field];
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.step = '0.01';
+            input.value = originalValue;
+            input.style.width = '100px';
+            
+            cell.innerHTML = '';
+            cell.appendChild(input);
+            input.focus();
+            
+            input.addEventListener('blur', function() {
+                const newValue = parseFloat(input.value) || 0;
+                product[field] = newValue;
+                saveToStorage();
+                renderTable();
+                updateSummaryCards();
+                showNotification('Valor atualizado!', 'success');
+            });
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            });
+        }
+
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            
+            const newName = prompt('Novo nome do produto:', product.name);
+            if (newName) product.name = newName;
+            
+            const newUnit = prompt('Nova unidade (I, M³, un, etc.):', product.unit);
+            if (newUnit) product.unit = newUnit;
+            
+            saveToStorage();
+            renderTable();
+            updateSummaryCards();
+            showNotification('Produto atualizado!', 'success');
+        }
+
+        function addNewProduct() {
+            const name = prompt('Nome do novo produto:');
+            if (!name) return;
+            
+            const unit = prompt('Unidade de medida (I, M³, un, etc.):', 'un');
+            if (!unit) return;
+            
+            const year1 = parseFloat(prompt(`Valor para ${settings.startYear}:`, '0')) || 0;
+            const year2 = parseFloat(prompt(`Valor para ${settings.endYear}:`, '0')) || 0;
+            
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                icon: 'fa-box',
+                color: '#f59e0b',
+                unit: unit,
+                year1: year1,
+                year2: year2
+            };
+            
+            products.push(newProduct);
+            saveToStorage();
+            renderTable();
+            updateSummaryCards();
+            showNotification('Produto adicionado!', 'success');
+        }
+
+        function deleteProduct(productId) {
+            if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+            
+            products = products.filter(p => p.id !== productId);
+            saveToStorage();
+            renderTable();
+            updateSummaryCards();
+            showNotification('Produto excluído!', 'error');
+        }
+
+        function updateTotals() {
+            let totalYear1 = 0;
+            let totalYear2 = 0;
+            
+            products.forEach(product => {
+                totalYear1 += product.year1;
+                totalYear2 += product.year2;
+            });
+            
+            const totalDifference = totalYear2 - totalYear1;
+            const totalGrowth = ((totalDifference / totalYear1) * 100).toFixed(2);
+            
+            document.getElementById('totalYear1').textContent = formatNumber(totalYear1);
+            document.getElementById('totalYear2').textContent = formatNumber(totalYear2);
+            document.getElementById('totalDifferenceCell').textContent = 
+                `${totalDifference >= 0 ? '+' : ''}${formatNumber(totalDifference)}`;
+            document.getElementById('totalGrowthCell').textContent = 
+                `${totalGrowth >= 0 ? '+' : ''}${totalGrowth}%`;
+            document.getElementById('totalGrowthCell').className = 
+                `growth-cell ${totalGrowth >= 0 ? 'growth-positive' : 'growth-negative'}`;
+        }
+
+        function updateSummaryCards() {
+            // Encontrar produto mais vendido em year2
+            let topProduct = products[0];
+            products.forEach(p => {
+                if (p.year2 > topProduct.year2) topProduct = p;
+            });
+            
+            // Encontrar maior e menor crescimento
+            let highestGrowth = -Infinity;
+            let lowestGrowth = Infinity;
+            let highestProduct = products[0];
+            let lowestProduct = products[0];
+            
+            products.forEach(p => {
+                const growth = ((p.year2 - p.year1) / p.year1) * 100;
+                if (growth > highestGrowth) {
+                    highestGrowth = growth;
+                    highestProduct = p;
+                }
+                if (growth < lowestGrowth) {
+                    lowestGrowth = growth;
+                    lowestProduct = p;
+                }
+            });
+            
+            // Totais
+            const totalYear1 = products.reduce((sum, p) => sum + p.year1, 0);
+            const totalYear2 = products.reduce((sum, p) => sum + p.year2, 0);
+            const totalDifference = totalYear2 - totalYear1;
+            const totalGrowth = ((totalDifference / totalYear1) * 100).toFixed(2);
+            
+            // Atualizar cards
+            document.getElementById('totalGrowth').textContent = `${totalGrowth}%`;
+            document.getElementById('totalDifference').textContent = `${totalDifference >= 0 ? '+' : ''}${formatNumber(totalDifference)}`;
+            document.getElementById('topYear').textContent = settings.endYear;
+            document.getElementById('topProduct').textContent = topProduct.name;
+            document.getElementById('topProductValue').textContent = formatNumber(topProduct.year2);
+            document.getElementById('topProductUnit').textContent = topProduct.unit;
+            document.getElementById('highestGrowthProduct').textContent = highestProduct.name;
+            document.getElementById('highestGrowthValue').textContent = `+${highestGrowth.toFixed(2)}%`;
+            document.getElementById('lowestGrowthProduct').textContent = lowestProduct.name;
+            document.getElementById('lowestGrowthValue').textContent = `+${lowestGrowth.toFixed(2)}%`;
+        }
+
+        function toggleEditPanel() {
+            document.getElementById('editPanel').classList.toggle('active');
+        }
+
+        function saveSettings() {
+            settings.companyName = document.getElementById('companyName').value;
+            settings.reportPeriod = document.getElementById('reportPeriod').value;
+            settings.startYear = parseInt(document.getElementById('startYear').value);
+            settings.endYear = parseInt(document.getElementById('endYear').value);
+            
+            saveToStorage();
+            updateHeaders();
+            showNotification('Configurações salvas!', 'success');
+            toggleEditPanel();
+        }
+
+        function updateHeaders() {
+            document.getElementById('year1Display').textContent = settings.startYear;
+            document.getElementById('year2Display').textContent = settings.endYear;
+            document.getElementById('year1Header').textContent = settings.startYear;
+            document.getElementById('year2Header').textContent = settings.endYear;
+            document.querySelector('.company-info h1').textContent = settings.companyName;
+        }
+
+        function recalculateAll() {
+            renderTable();
+            updateSummaryCards();
+            showNotification('Todos os valores recalculados!', 'success');
+        }
+
+        function resetData() {
+            if (confirm('Isso irá restaurar os dados originais. Deseja continuar?')) {
+                localStorage.removeItem('postoDistritoData');
+                localStorage.removeItem('postoDistritoSettings');
+                location.reload();
+            }
+        }
+
+        function generatePDF() {
+            const element = document.querySelector('.container');
+            const btn = document.querySelector('.btn-success');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+            btn.disabled = true;
+            
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `Relatorio_Posto_Distrito_${new Date().toISOString().slice(0,10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                }
+            };
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showNotification('PDF gerado com sucesso!', 'success');
+            });
+        }
+
+        // Funções utilitárias
+        function formatNumber(num) {
+            return num.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function showNotification(text, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = text;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateDate() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+        }
+
+        // Local Storage
+        function saveToStorage() {
+            localStorage.setItem('postoDistritoData', JSON.stringify(products));
+            localStorage.setItem('postoDistritoSettings', JSON.stringify(settings));
+        }
+
+        function loadFromStorage() {
+            const savedData = localStorage.getItem('postoDistritoData');
+            const savedSettings = localStorage.getItem('postoDistritoSettings');
+            
+            if (savedData) products = JSON.parse(savedData);
+            if (savedSettings) {
+                settings = JSON.parse(savedSettings);
+                document.getElementById('companyName').value = settings.companyName;
+                document.getElementById('reportPeriod').value = settings.reportPeriod;
+                document.getElementById('startYear').value = settings.startYear;
+                document.getElementById('endYear').value = settings.endYear;
+            }
+        }
+
+        // Permitir edição por duplo clique em qualquer lugar
+        document.addEventListener('dblclick', function(e) {
+            if (e.target.classList.contains('editable-cell')) {
+                const cell = e.target;
+                const row = cell.parentElement;
+                const productId = parseInt(row.querySelector('.btn-edit').onclick.toString().match(/\d+/)[0]);
+                const field = cell.cellIndex === 1 ? 'year1' : 'year2';
+                editCell(productId, field);
+            }
+        });
+    </script>
+</body>
+</html>
